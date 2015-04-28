@@ -2,6 +2,10 @@ if exists('g:loaded_textobj_juliablock')  "{{{1
   finish
 endif
 
+if !exists("loaded_matchit")
+  finish
+endif
+
 " Interface  "{{{1
 call textobj#user#plugin('juliablock', {
 \      '-': {
@@ -12,40 +16,76 @@ call textobj#user#plugin('juliablock', {
 \    })
 
 " Misc.  "{{{1
-let s:comment_escape = '\v^[^#]*'
-let s:block_openers = '\zs(<def>|<if>|<do>|<module>|<class>)'
-let s:start_pattern = s:comment_escape . s:block_openers
-let s:end_pattern = s:comment_escape . '\zs<end>'
-let s:skip_pattern = 'getline(".") =~ "\\v\\S\\s<(if|unless)>\\s\\S"'
+let s:start_pattern = '\%(\.\s*\)\@<!\<\%(\%(staged\)\?function\|macro\|begin\|type\|immutable\|let\|do\|\%(bare\)\?module\|quote\|if\|for\|while\|try\)\>'
+let s:end_pattern = '\<end\>'
+" we need to skip everything within comments, strings and
+" the 'end' keyword when it is used as a range rather than as
+" the end of a block
+let s:skip_pattern = 'synIDattr(synID(line("."),col("."),1),"name") =~ '
+      \ . '"\\<julia\\%(ComprehensionFor\\|RangeEnd\\|QuotedBlockKeyword\\|InQuote\\|Comment[LM]\\|\\%([bv]\\|ip\\|MIME\\|Tri\\|Shell\\)\\?String\\|RegEx\\)\\>"'
+
+function! s:find_block()
+
+  if &ft != "julia"
+    call feedkeys("\<Esc>")
+    return
+  endif
+
+  let flags = 'W'
+  if expand("<cword>") == "end"
+    let flags = 'cW'
+  endif
+
+  let save_pos = getpos('.')
+  keepjumps normal ^
+  keepjumps let searchret = searchpair(s:start_pattern,'',s:end_pattern, flags, s:skip_pattern)
+  if searchret <= 0
+    call setpos('.', save_pos)
+    call feedkeys("\<Esc>")
+    return
+  endif
+
+  let end_pos = getpos('.')
+  " Jump to match
+  keepjumps normal %
+  let start_pos = getpos('.')
+
+  return [start_pos, end_pos, save_pos]
+endfunction
 
 function! s:select_a()
-  let s:flags = 'W'
+  let ret_find_block = s:find_block()
+  if empty(ret_find_block)
+    return
+  endif
+  let [start_pos, end_pos, save_pos] = ret_find_block
 
-  call searchpair(s:start_pattern,'',s:end_pattern, s:flags, s:skip_pattern)
-  let end_pos = getpos('.')
-
-  " Jump to match
-  normal %
-  let start_pos = getpos('.')
+  keepjumps call setpos('.', save_pos)
+  normal m`
+  keepjumps call setpos('.', end_pos)
 
   return ['V', start_pos, end_pos]
 endfunction
 
 function! s:select_i()
-  let s:flags = 'W'
-  if expand('<cword>') == 'end'
-    let s:flags = 'cW'
+  let ret_find_block = s:find_block()
+  if empty(ret_find_block)
+    return
+  endif
+  let [start_pos, end_pos, save_pos] = ret_find_block
+
+  if end_pos[1] <= start_pos[1]+1
+    call setpos('.', save_pos)
+    call feedkeys("\<Esc>")
+    return
   endif
 
-  call searchpair(s:start_pattern,'',s:end_pattern, s:flags, s:skip_pattern)
+  keepjumps call setpos('.', save_pos)
+  normal m`
+  keepjumps call setpos('.', end_pos)
 
-  " Move up one line, and save position
-  normal k^
-  let end_pos = getpos('.')
-
-  " Move down again, jump to match, then down one line and save position
-  normal j^%j
-  let start_pos = getpos('.')
+  let start_pos[1] += 1
+  let end_pos[1] -= 1
 
   return ['V', start_pos, end_pos]
 endfunction
