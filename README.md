@@ -1,5 +1,3 @@
-## THIS DOES NOT WORK YET!!! DO NOT USE ##
-
 A custom text object for selecting julia blocks.
 
 Depends on Kana's [textobj-user plugin][u]. Test suite requires [vspec][] (also by Kana).
@@ -19,8 +17,8 @@ Usage
 =====
 
 When textobj-juliablock is installed you will gain two new text objects, which
-are triggered by `ar` and `ir` respectively. These follow Vim convention, so
-that `ar` selects _all_ of a julia block, and `ir` selects the _inner_ portion
+are triggered by `aj` and `ij` respectively. These follow Vim convention, so
+that `aj` selects _all_ of a julia block, and `ij` selects the _inner_ portion
 of a juliablock.
 
 In julia, a block is always closed with the `end` keyword. Ruby blocks may be
@@ -35,7 +33,7 @@ opened using one of several keywords, including `module`, `type`, `function`,
     end
     end
 
-Suppose your cursor was positioned on the word `function`. Typing `var` would
+Suppose your cursor was positioned on the word `function`. Typing `vaj` would
 enable visual mode selecting _all_ of the method definition. Your selection
 would comprise the following lines:
 
@@ -45,18 +43,18 @@ would comprise the following lines:
       end
     end
 
-Whereas if you typed `vir`, you would select everything _inside_ of the method
+Whereas if you typed `vij`, you would select everything _inside_ of the method
 definition, which looks like this:
 
     for i in 1:3
       println(i)
     end
 
-Note that the `ar` and `ir` text objects always enable _visual line_ mode,
+Note that the `aj` and `ij` text objects always enable _visual line_ mode,
 even if you were in visual character or block mode before you triggered the
 juliablock text object.
 
-Note too that the `ar` and `ir` text objects always position your cursor on
+Note too that the `aj` and `ij` text objects always position your cursor on
 the `end` keyword. If you want to move to the top of the selection, you can do
 so with the `o` key.
 
@@ -71,9 +69,9 @@ way if you prefix a count. This is due to a limitation in the [textobj-user
 plugin][u].
 
 However, you can achieve a similar effect by repeating the juliablock
-text-object manually. So if you press `var` to select the current julia block,
-you can expand your selection outwards by repeating `ar`, or contract your
-selection inwards by repeating `ir`.
+text-object manually. So if you press `vaj` to select the current julia block,
+you can expand your selection outwards by repeating `aj`, or contract your
+selection inwards by repeating `ij`.
 
 Development
 ===========
