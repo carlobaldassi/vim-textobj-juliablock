@@ -1,4 +1,4 @@
-A custom text object for selecting ruby blocks.
+A custom text object for selecting julia blocks.
 
 Depends on vimscript #2100, which provides a framework for creating custom
 text objects.
@@ -7,47 +7,43 @@ Also requires that matchit.vim vimscript #39 is enabled.
 
 # Usage #
 
-When textobj-rubyblock is installed you will gain two new text objects, which
+When textobj-juliablock is installed you will gain two new text objects, which
 are triggered by `ar` and `ir` respectively. These follow Vim convention, so
-that `ar` selects _all_ of a ruby block, and `ir` selects the _inner_ portion
-of a rubyblock.
+that `ar` selects _all_ of a julia block, and `ir` selects the _inner_ portion
+of a juliablock.
 
-In ruby, a block is always closed with the `end` keyword. Ruby blocks may be
-opened using one of several keywords, including `module`, `class`, `def` `if`
-and `do`. This example demonstrates a few of these:
+In julia, a block is always closed with the `end` keyword. Ruby blocks may be
+opened using one of several keywords, including `module`, `type`, `function`,
+`if` and `for`. This example demonstrates a few of these:
 
     module Foo
-      class Bar
-        def Baz
-          [1,2,3].each do |i|
-            i + 1
-          end
-        end
+    function Bar()
+      for i in 1:3
+        println(i)
       end
     end
+    end
 
-Suppose your cursor was positioned on the word `def`. Typing `var` would
+Suppose your cursor was positioned on the word `function`. Typing `var` would
 enable visual mode selecting _all_ of the method definition. Your selection
-would comprise the following lines (also, see screenshot:
-http://vimcasts.org/images/blog/rubyblock-all.png):
+would comprise the following lines:
 
-    def Baz
-      [1,2,3].each do |i|
-        i + 1
+    function Bar()
+      for i in 1:3
+        println(i)
       end
     end
 
 Whereas if you typed `vir`, you would select everything _inside_ of the method
-definition, which looks like this (also, see screenshot:
-http://vimcasts.org/images/blog/rubyblock-inner.png):
+definition, which looks like this:
 
-    [1,2,3].each do |i|
-      i + 1
+    for i in 1:3
+      println(i)
     end
 
 Note that the `ar` and `ir` text objects always enable _visual line_ mode,
 even if you were in visual character or block mode before you triggered the
-rubyblock text object.
+juliablock text object.
 
 Note too that the `ar` and `ir` text objects always position your cursor on
 the `end` keyword. If you want to move to the top of the selection, you can do
@@ -58,11 +54,11 @@ so with the `o` key.
 Some text objects in Vim respond to a count. For example, the `a{` text object
 will select _all_ of the current `{}` delimited block, but if you prefix it
 with the number 2 (e.g. `v2i{`) then it will select all of the block that
-contains the current block. The rubyblock text object does not respond in this
+contains the current block. The juliablock text object does not respond in this
 way if you prefix a count. This is due to a limitation in vimscript #2100.
 
-However, you can achieve a similar effect by repeating the rubyblock
-text-object manually. So if you press `var` to select the current ruby block,
+However, you can achieve a similar effect by repeating the juliablock
+text-object manually. So if you press `var` to select the current julia block,
 you can expand your selection outwards by repeating `ar`, or contract your
 selection inwards by repeating `ir`.
 
@@ -93,5 +89,5 @@ open the file with Vim and run the command:
 If you prefer to manage your plugins using pathogen (vimscript #2332), then
 you might prefer to checkout the latest version directly from github:
 
-* https://github.com/nelstrom/vim-textobj-rubyblock
+* https://github.com/carlobaldassi/vim-textobj-juliablock
 * https://github.com/kana/vim-textobj-user

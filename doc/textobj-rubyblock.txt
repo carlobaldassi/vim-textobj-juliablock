@@ -1,59 +1,58 @@
-*textobj-rubyblock.txt*	Text objects for ruby blocks
+*textobj-juliablock.txt*	Text objects for julia blocks
 
 Version 0.0.1
 
-CONTENTS					*textobj-rubyblock-contents*
+CONTENTS					*textobj-juliablock-contents*
 
-Introduction		|textobj-rubyblock-introduction|
-Interface		|textobj-rubyblock-interface|
-Mappings		|textobj-rubyblock-mappings|
-Examples		|textobj-rubyblock-examples|
-Bugs			|textobj-rubyblock-bugs|
-Changelog		|textobj-rubyblock-changelog|
+Introduction		|textobj-juliablock-introduction|
+Interface		|textobj-juliablock-interface|
+Mappings		|textobj-juliablock-mappings|
+Examples		|textobj-juliablock-examples|
+Bugs			|textobj-juliablock-bugs|
+Changelog		|textobj-juliablock-changelog|
 
 
 ==============================================================================
-INTRODUCTION					*textobj-rubyblock-introduction*
+INTRODUCTION					*textobj-juliablock-introduction*
 
-The *textobj-rubyblock* plugin provides two new |text-objects| which are
+The *textobj-juliablock* plugin provides two new |text-objects| which are
 triggered by `ar` and `ir` respectively. These follow Vim convention, so that
-`ar` selects _all_ of a ruby block, and `ir` selects the _inner_ portion of a
-rubyblock.
+`ar` selects _all_ of a julia block, and `ir` selects the _inner_ portion of a
+juliablock.
 
-In ruby, a block is always closed with the `end` keyword. Ruby blocks may be
-opened using one of several keywords, including `module`, `class`, `def` `if`
-and `do`. This example demonstrates a few of these:
+In julia, a block is always closed with the `end` keyword. Ruby blocks may be
+opened using one of several keywords, including `module`, `type`, `function`,
+`if` and `for`. This example demonstrates a few of these:
 >
+
 	module Foo
-	  class Bar
-	    def Baz
-	      [1,2,3].each do |i|
-	        i + 1
-	      end
-	    end
+	function Bar()
+	  for i in 1:3
+	    println(i)
 	  end
 	end
+	end
 <
-Suppose your cursor was positioned on the word `def` in this snippet. Typing
-`var` would enable visual mode selecting _all_ of the method definition. Your
-selection would comprise the following lines:
+Suppose your cursor was positioned on the word `function`. Typing `var` would
+enable visual mode selecting _all_ of the method definition. Your selection
+would comprise the following lines:
 >
-	def Baz
-	  [1,2,3].each do |i|
-	    i + 1
+	function Bar()
+	  for i in 1:3
+	    println(i)
 	  end
 	end
 <
 Whereas if you typed `vir`, you would select everything _inside_ of the method
 definition, which looks like this:
 >
-	[1,2,3].each do |i|
-	  i + 1
+	for i in 1:3
+	  println(i)
 	end
 <
 Note that the `ar` and `ir` text objects always enable _visual line_ mode,
 even if you were in visual character or block mode before you triggered the
-rubyblock text object.
+juliablock text object.
 
 Note too that the `ar` and `ir` text objects always position your cursor on
 the `end` keyword. If you want to move to the top of the selection, you can do
@@ -64,11 +63,11 @@ so with the `o` key.
 Some text objects in Vim respond to a count. For example, the `a{` text object
 will select _all_ of the current `{}` delimited block, but if you prefix it
 with the number 2 (e.g. `v2i{`) then it will select all of the block that
-contains the current block. The rubyblock text object does not respond in this
-way if you prefix a count. This is due to a limitation in vimscript #2100.
+contains the current block. The juliablock text object does not respond in this
+way if you prefix a count. this is due to a limitation in vimscript #2100.
 
-However, you can achieve a similar effect by repeating the rubyblock
-text-object manually. So if you press `var` to select the current ruby block,
+However, you can achieve a similar effect by repeating the juliablock
+text-object manually. So if you press `var` to select the current julia block,
 you can expand your selection outwards by repeating `ar`, or contract your
 selection inwards by repeating `ir`.
 
@@ -86,65 +85,65 @@ time Vim starts up:
     runtime macros/matchit.vim
 <
 Latest version:
-http://github.com/nelstrom/vim-textobj-rubyblock
+http://github.com/carlobaldassi/vim-textobj-juliablock
 
 
 ==============================================================================
-INTERFACE					*textobj-rubyblock-interface*
+INTERFACE					*textobj-juliablock-interface*
 
 ------------------------------------------------------------------------------
-MAPPINGS					*textobj-rubyblock-mappings*
+MAPPINGS					*textobj-juliablock-mappings*
 
 These key mappings are defined in Visual mode and Operator-pending mode.
 
-<Plug>(textobj-rubyblock-a)			*<Plug>(textobj-rubyblock-a)*
-	Select the ruby block including the opening and closing lines.
+<Plug>(textobj-juliablock-a)			*<Plug>(textobj-juliablock-a)*
+	Select the julia block including the opening and closing lines.
 
-<Plug>(textobj-rubyblock-i)			*<Plug>(textobj-rubyblock-i)*
-	Select the inner lines of a ruby block. The opening and closing
+<Plug>(textobj-juliablock-i)			*<Plug>(textobj-juliablock-i)*
+	Select the inner lines of a julia block. The opening and closing
 	lines are not included.
 
 ==============================================================================
-CUSTOMIZING					*textobj-rubyblock-customizing*
+CUSTOMIZING					*textobj-juliablock-customizing*
 
-				*g:textobj_rubyblock_no_default_key_mappings*
+				*g:textobj_juliablock_no_default_key_mappings*
 					*:TextobjRubyblockDefaultKeyMappings*
 
 	This plugin will define the following key mappings in Visual mode and
 	Operator-pending mode automatically.  If you don't want these key
-	mappings, define |g:textobj_rubyblock_no_default_key_mappings| before
+	mappings, define |g:textobj_juliablock_no_default_key_mappings| before
 	this plugin is loaded (e.g. in your |vimrc|).  You can also use
 	|:TextobjRubyblockDefaultKeyMappings| to redefine these key mappings.
 	This command doesn't override existing {lhs}s unless [!] is given.
 
 	{lhs}	{rhs}			~
 	-----	----------------------	~
-	ar	<Plug>(textobj-rubyblock-a)
-	ir	<Plug>(textobj-rubyblock-i)
+	ar	<Plug>(textobj-juliablock-a)
+	ir	<Plug>(textobj-juliablock-i)
 
 	Suppose that you didn't like using `ar` and `ir` to trigger the
-	rubyblock text objects, and instead wanted to map them to `ae` and
+	juliablock text objects, and instead wanted to map them to `ae` and
 	`ie`. You could achieve this by placing the following in your vimrc
 	file:
 
-	let g:textobj_rubyblock_no_default_key_mappings = 1
-	xmap ae  <Plug>(textobj-rubyblock-a)
-	omap ae  <Plug>(textobj-rubyblock-a)
-	xmap ie  <Plug>(textobj-rubyblock-i)
-	omap ie  <Plug>(textobj-rubyblock-i)
+	let g:textobj_juliablock_no_default_key_mappings = 1
+	xmap ae  <Plug>(textobj-juliablock-a)
+	omap ae  <Plug>(textobj-juliablock-a)
+	xmap ie  <Plug>(textobj-juliablock-i)
+	omap ie  <Plug>(textobj-juliablock-i)
 
 ==============================================================================
-BUGS						*textobj-rubyblock-bugs*
+BUGS						*textobj-juliablock-bugs*
 
 - [count] is just ignored.
 
 - See |textobj-user-bugs| for further information.
 
 ==============================================================================
-CHANGELOG					*textobj-rubyblock-changelog*
+CHANGELOG					*textobj-juliablock-changelog*
 
-0.0.1	2010-12-27
-	- First release.
+0.0.0	2015-04-28
+	- Forked from https://github.com/nelstrom/vim-textobj-rubyblock
 
 ==============================================================================
 vim:tw=78:ts=8:ft=help:norl:fen:fdl=0:fdm=marker:

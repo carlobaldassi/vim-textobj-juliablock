@@ -1,9 +1,9 @@
-if exists('g:loaded_textobj_rubyblock')  "{{{1
+if exists('g:loaded_textobj_juliablock')  "{{{1
   finish
 endif
 
 " Interface  "{{{1
-call textobj#user#plugin('rubyblock', {
+call textobj#user#plugin('juliablock', {
 \      '-': {
 \        '*sfile*': expand('<sfile>:p'),
 \        'select-a': 'ar',  '*select-a-function*': 's:select_a',
@@ -52,7 +52,7 @@ endfunction
 
 " Fin.  "{{{1
 
-let g:loaded_textobj_rubyblock = 1
+let g:loaded_textobj_juliablock = 1
 
 " __END__
 " vim: foldmethod=marker

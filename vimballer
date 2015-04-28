@@ -1,2 +1,2 @@
-plugin/textobj/rubyblock.vim
-doc/textobj-rubyblock.txt
+plugin/textobj/juliablock.vim
+doc/textobj-juliablock.txt
