@@ -13,24 +13,22 @@ call textobj#user#plugin('juliablock', {
 
 function! s:find_block(current_mode)
 
-  let save_pos = getpos('.')
-
   if &ft != "julia"
-    return s:abort(save_pos)
+    return s:abort()
   endif
 
   if !exists("b:julia_vim_loaded")
     echohl WarningMsg |
       \ echomsg "the julia-vim plugin is needed in order to use juliablock text objects" |
       \ echohl None | sleep 1
-    return s:abort(save_pos)
+    return s:abort()
   endif
 
   if !exists("g:loaded_matchit")
     echohl WarningMsg |
       \ echomsg "matchit must be loaded in order to use juliablock text objects" |
       \ echohl None | sleep 1
-    return s:abort(save_pos)
+    return s:abort()
   endif
 
   let flags = 'W'
@@ -41,7 +39,7 @@ function! s:find_block(current_mode)
       normal %
       if getpos('.') == b:txtobj_jl_last_start_pos
         " shouldn't happen, but let's avoid infinite loops anyway
-        return s:abort(save_pos)
+        return s:abort()
       endif
     endwhile
     if a:current_mode == 'i' || b:txtobj_jl_last_mode == 'i'
@@ -56,7 +54,7 @@ function! s:find_block(current_mode)
   let searchret = searchpair(b:julia_begin_keywords, '', b:julia_end_keywords, flags, b:match_skip)
   if searchret <= 0
     if !b:txtobj_jl_did_select
-      return s:abort(save_pos)
+      return s:abort()
     else
       call setpos('.', b:txtobj_jl_last_end_pos)
     endif
@@ -70,29 +68,36 @@ function! s:find_block(current_mode)
   let b:txtobj_jl_last_start_pos = copy(start_pos)
   let b:txtobj_jl_last_end_pos = copy(end_pos)
 
-  return [start_pos, end_pos, save_pos]
+  return [start_pos, end_pos]
 endfunction
 
-function! s:abort(save_pos)
-  call setpos('.', a:save_pos)
+function! s:abort()
+  call setpos('.', b:txtobj_jl_save_pos)
   call feedkeys("\<Esc>")
   return 0
 endfunction
 
-function! s:set_mark_tick(save_pos, end_pos)
-  call setpos('.', a:save_pos)
+function! s:set_mark_tick(end_pos)
+  call setpos('.', b:txtobj_jl_save_pos)
   normal! m`
   keepjumps call setpos('.', a:end_pos)
 endfunction
 
+function! s:get_save_pos()
+  if !exists("b:txtobj_jl_save_pos") || !b:txtobj_jl_did_select
+    let b:txtobj_jl_save_pos = getpos('.')
+  endif
+endfunction
+
 function! s:select_a()
+  call s:get_save_pos()
   let ret_find_block = s:find_block("a")
   if empty(ret_find_block)
     return 0
   endif
-  let [start_pos, end_pos, save_pos] = ret_find_block
+  let [start_pos, end_pos] = ret_find_block
 
-  call s:set_mark_tick(save_pos, end_pos)
+  call s:set_mark_tick(end_pos)
 
   call setpos('.', end_pos)
   normal! e
@@ -105,20 +110,21 @@ function! s:select_a()
 endfunction
 
 function! s:select_i()
+  call s:get_save_pos()
   let ret_find_block = s:find_block("i")
   if empty(ret_find_block)
     return 0
   endif
-  let [start_pos, end_pos, save_pos] = ret_find_block
+  let [start_pos, end_pos] = ret_find_block
 
   if end_pos[1] <= start_pos[1]+1
-    return s:abort(save_pos)
+    return s:abort()
   endif
+
+  call s:set_mark_tick(end_pos)
 
   let b:txtobj_jl_doing_select = 1
   let b:txtobj_jl_last_mode = 'i'
-
-  call s:set_mark_tick(save_pos, end_pos)
 
   let start_pos[1] += 1
   call setpos('.', start_pos)
