@@ -1,4 +1,4 @@
-:TextobjRubyblockDefaultKeyMappings	textobj-juliablock.txt	/*:TextobjRubyblockDefaultKeyMappings*
+:TextobjJuliablockDefaultKeyMappings	textobj-juliablock.txt	/*:TextobjJuliablockDefaultKeyMappings*
 <Plug>(textobj-juliablock-a)	textobj-juliablock.txt	/*<Plug>(textobj-juliablock-a)*
 <Plug>(textobj-juliablock-i)	textobj-juliablock.txt	/*<Plug>(textobj-juliablock-i)*
 g:textobj_juliablock_no_default_key_mappings	textobj-juliablock.txt	/*g:textobj_juliablock_no_default_key_mappings*

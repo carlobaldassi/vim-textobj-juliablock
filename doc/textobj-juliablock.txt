@@ -18,9 +18,9 @@ INTRODUCTION					*textobj-juliablock-introduction*
 The *textobj-juliablock* plugin provides two new |text-objects| which are
 triggered by `aj` and `ij` respectively. These follow Vim convention, so that
 `aj` selects _all_ of a julia block, and `ij` selects the _inner_ portion of a
-juliablock.
+julia block.
 
-In julia, a block is always closed with the `end` keyword. Ruby blocks may be
+In julia, a block is always closed with the `end` keyword. Julia blocks may be
 opened using one of several keywords, including `module`, `type`, `function`,
 `if` and `for`. This example demonstrates a few of these:
 >
@@ -52,7 +52,7 @@ definition, which looks like this:
 <
 Note that the `aj` and `ij` text objects always enable _visual line_ mode,
 even if you were in visual character or block mode before you triggered the
-juliablock text object.
+julia block text object.
 
 Note too that the `aj` and `ij` text objects always position your cursor on
 the `end` keyword. If you want to move to the top of the selection, you can do
@@ -63,10 +63,10 @@ so with the `o` key.
 Some text objects in Vim respond to a count. For example, the `a{` text object
 will select _all_ of the current `{}` delimited block, but if you prefix it
 with the number 2 (e.g. `v2i{`) then it will select all of the block that
-contains the current block. The juliablock text object does not respond in this
+contains the current block. The julia block text object does not respond in this
 way if you prefix a count. this is due to a limitation in vimscript #2100.
 
-However, you can achieve a similar effect by repeating the juliablock
+However, you can achieve a similar effect by repeating the julia block
 text-object manually. So if you press `vaj` to select the current julia block,
 you can expand your selection outwards by repeating `aj`, or contract your
 selection inwards by repeating `ij`.
@@ -108,13 +108,13 @@ These key mappings are defined in Visual mode and Operator-pending mode.
 CUSTOMIZING					*textobj-juliablock-customizing*
 
 				*g:textobj_juliablock_no_default_key_mappings*
-					*:TextobjRubyblockDefaultKeyMappings*
+					*:TextobjJuliablockDefaultKeyMappings*
 
 	This plugin will define the following key mappings in Visual mode and
 	Operator-pending mode automatically.  If you don't want these key
 	mappings, define |g:textobj_juliablock_no_default_key_mappings| before
 	this plugin is loaded (e.g. in your |vimrc|).  You can also use
-	|:TextobjRubyblockDefaultKeyMappings| to redefine these key mappings.
+	|:TextobjJuliablockDefaultKeyMappings| to redefine these key mappings.
 	This command doesn't override existing {lhs}s unless [!] is given.
 
 	{lhs}	{rhs}			~
@@ -123,7 +123,7 @@ CUSTOMIZING					*textobj-juliablock-customizing*
 	ij	<Plug>(textobj-juliablock-i)
 
 	Suppose that you didn't like using `aj` and `ij` to trigger the
-	juliablock text objects, and instead wanted to map them to `ae` and
+	julia block text objects, and instead wanted to map them to `ae` and
 	`ie`. You could achieve this by placing the following in your vimrc
 	file:
 

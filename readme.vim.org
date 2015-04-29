@@ -10,9 +10,9 @@ Also requires that matchit.vim vimscript #39 is enabled.
 When textobj-juliablock is installed you will gain two new text objects, which
 are triggered by `aj` and `ij` respectively. These follow Vim convention, so
 that `aj` selects _all_ of a julia block, and `ij` selects the _inner_ portion
-of a juliablock.
+of a julia block.
 
-In julia, a block is always closed with the `end` keyword. Ruby blocks may be
+In julia, a block is always closed with the `end` keyword. Julia blocks may be
 opened using one of several keywords, including `module`, `type`, `function`,
 `if` and `for`. This example demonstrates a few of these:
 
@@ -43,7 +43,7 @@ definition, which looks like this:
 
 Note that the `aj` and `ij` text objects always enable _visual line_ mode,
 even if you were in visual character or block mode before you triggered the
-juliablock text object.
+juliab lock text object.
 
 Note too that the `aj` and `ij` text objects always position your cursor on
 the `end` keyword. If you want to move to the top of the selection, you can do
@@ -54,10 +54,10 @@ so with the `o` key.
 Some text objects in Vim respond to a count. For example, the `a{` text object
 will select _all_ of the current `{}` delimited block, but if you prefix it
 with the number 2 (e.g. `v2i{`) then it will select all of the block that
-contains the current block. The juliablock text object does not respond in this
+contains the current block. The julia block text object does not respond in this
 way if you prefix a count. This is due to a limitation in vimscript #2100.
 
-However, you can achieve a similar effect by repeating the juliablock
+However, you can achieve a similar effect by repeating the julia block
 text-object manually. So if you press `vaj` to select the current julia block,
 you can expand your selection outwards by repeating `aj`, or contract your
 selection inwards by repeating `ij`.
