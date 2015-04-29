@@ -11,19 +11,18 @@ call textobj#user#plugin('juliablock', {
 \    })
 
 
-let s:start_pattern = '\%(\.\s*\)\@<!\<\%(\%(staged\)\?function\|macro\|begin\|type\|immutable\|let\|do\|\%(bare\)\?module\|quote\|if\|for\|while\|try\)\>'
-let s:end_pattern = '\<end\>'
-" we need to skip everything within comments, strings and
-" the 'end' keyword when it is used as a range rather than as
-" the end of a block
-let s:skip_pattern = 'synIDattr(synID(line("."),col("."),1),"name") =~ '
-      \ . '"\\<julia\\%(ComprehensionFor\\|RangeEnd\\|QuotedBlockKeyword\\|InQuote\\|Comment[LM]\\|\\%([bv]\\|ip\\|MIME\\|Tri\\|Shell\\)\\?String\\|RegEx\\)\\>"'
-
 function! s:find_block(current_mode)
 
   let save_pos = getpos('.')
 
   if &ft != "julia"
+    return s:abort(save_pos)
+  endif
+
+  if !exists("b:julia_vim_loaded")
+    echohl WarningMsg |
+      \ echomsg "the julia-vim plugin is needed in order to use juliablock text objects" |
+      \ echohl None | sleep 1
     return s:abort(save_pos)
   endif
 
@@ -38,7 +37,7 @@ function! s:find_block(current_mode)
 
   if b:txtobj_jl_did_select
     call setpos('.', b:txtobj_jl_last_start_pos)
-    while expand("<cword>") !~# s:end_pattern
+    while expand("<cword>") !~# b:julia_end_keywords
       normal %
       if getpos('.') == b:txtobj_jl_last_start_pos
         " shouldn't happen, but let's avoid infinite loops anyway
@@ -48,11 +47,13 @@ function! s:find_block(current_mode)
     if a:current_mode == 'i' || b:txtobj_jl_last_mode == 'i'
       let flags .= 'c'
     endif
-  elseif expand("<cword>") =~# s:end_pattern
+  elseif expand("<cword>") =~# b:julia_end_keywords
     let flags .= 'c'
     normal b
   endif
-  let searchret = searchpair(s:start_pattern, '', s:end_pattern, flags, s:skip_pattern)
+  " NOTE: b:julia_begin_keywords, b:julia_end_keywords and b:match_skip are
+  "       defined in the julia-vim plugin
+  let searchret = searchpair(b:julia_begin_keywords, '', b:julia_end_keywords, flags, b:match_skip)
   if searchret <= 0
     if !b:txtobj_jl_did_select
       return s:abort(save_pos)
