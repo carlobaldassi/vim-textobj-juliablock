@@ -142,8 +142,9 @@ BUGS						*textobj-juliablock-bugs*
 ==============================================================================
 CHANGELOG					*textobj-juliablock-changelog*
 
-0.0.0	2015-04-28
+0.0.1	2015-04-28
 	- Forked from https://github.com/nelstrom/vim-textobj-rubyblock
+	- Adapted to Julia, tweaked
 
 ==============================================================================
 vim:tw=78:ts=8:ft=help:norl:fen:fdl=0:fdm=marker:
