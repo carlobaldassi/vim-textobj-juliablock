@@ -97,7 +97,6 @@ function! s:select_a()
   call setpos('.', end_pos)
   normal! e
   let end_pos = getpos('.')
-  let end_pos[2] += 1
 
   let b:txtobj_jl_doing_select = 1
   let b:txtobj_jl_last_mode = 'a'
@@ -122,8 +121,11 @@ function! s:select_i()
   call s:set_mark_tick(save_pos, end_pos)
 
   let start_pos[1] += 1
+  call setpos('.', start_pos)
+  normal! ^
+  let start_pos = getpos('.')
   let end_pos[1] -= 1
-  let end_pos[2] = len(getline(end_pos[1])) + 1
+  let end_pos[2] = len(getline(end_pos[1]))
 
   return ['V', start_pos, end_pos]
 endfunction
