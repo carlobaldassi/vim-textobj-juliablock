@@ -4,7 +4,7 @@ endif
 
 call textobj#user#plugin('juliablock', {
 \      '-': {
-\        '*sfile*': expand('<sfile>:p'),
+\        'sfile': expand('<sfile>:p'),
 \        'select-a': 'aj',  '*select-a-function*': 's:select_a',
 \        'select-i': 'ij',  '*select-i-function*': 's:select_i'
 \      }
