@@ -94,12 +94,30 @@ function! s:get_save_pos()
   endif
 endfunction
 
+function! s:repeated_find(ai_mode, select_mode)
+  let repeat = v:count1 + (a:ai_mode == 'i' ? 1 : 0)
+  for c in range(repeat)
+    let current_mode = (c < repeat - 1 ? 'a' : a:ai_mode) . a:select_mode
+    let ret_find_block = s:find_block(current_mode)
+    if empty(ret_find_block)
+      return 0
+    endif
+    let [start_pos, end_pos] = ret_find_block
+    call setpos('.', end_pos)
+    let b:txtobj_jl_last_mode = current_mode
+    if c < repeat - 1
+      let b:txtobj_jl_doing_select = 0
+      let b:txtobj_jl_did_select = 1
+    endif
+  endfor
+  return [start_pos, end_pos]
+endfunction
+
 function! s:select_a(...)
   let select_mode = a:0 > 0 ? a:1 : 'v'
-  let current_mode = 'a' . select_mode
   call s:get_save_pos()
   let current_pos = getpos('.')
-  let ret_find_block = s:find_block(current_mode)
+  let ret_find_block = s:repeated_find('a', select_mode)
   if empty(ret_find_block)
     return 0
   endif
@@ -107,12 +125,11 @@ function! s:select_a(...)
 
   call s:set_mark_tick(end_pos)
 
-  call setpos('.', end_pos)
   normal! e
   let end_pos = getpos('.')
 
   let b:txtobj_jl_doing_select = 1
-  let b:txtobj_jl_last_mode = 'a' . select_mode
+  let b:txtobj_jl_did_select = 0
 
   " the textobj-user plugin triggers CursorMove only if
   " end_pos is different than the staring position
@@ -130,9 +147,9 @@ endfunction
 
 function! s:select_i(...)
   let select_mode = a:0 > 0 ? a:1 : 'v'
-  let current_mode = 'i' . select_mode
   call s:get_save_pos()
-  let ret_find_block = s:find_block(current_mode)
+  let current_pos = getpos('.')
+  let ret_find_block = s:repeated_find('i', select_mode)
   if empty(ret_find_block)
     return 0
   endif
@@ -145,7 +162,7 @@ function! s:select_i(...)
   call s:set_mark_tick(end_pos)
 
   let b:txtobj_jl_doing_select = 1
-  let b:txtobj_jl_last_mode = 'i' . select_mode
+  let b:txtobj_jl_did_select = 0
 
   let start_pos[1] += 1
   call setpos('.', start_pos)
@@ -153,6 +170,13 @@ function! s:select_i(...)
   let start_pos = getpos('.')
   let end_pos[1] -= 1
   let end_pos[2] = len(getline(end_pos[1]))
+
+  " the textobj-user plugin triggers CursorMove only if
+  " end_pos is different than the staring position
+  " (this is needed when starting from the 'd' in 'end')
+  if current_pos == end_pos
+    call s:cursor_moved()
+  endif
 
   return [select_mode, start_pos, end_pos]
 endfunction
