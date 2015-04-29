@@ -7,6 +7,11 @@ call textobj#user#plugin('juliablock', {
 \        'sfile': expand('<sfile>:p'),
 \        'select-a': 'aj',  '*select-a-function*': 's:select_a',
 \        'select-i': 'ij',  '*select-i-function*': 's:select_i'
+\      },
+\      'line': {
+\        'sfile': expand('<sfile>:p'),
+\        'select-a': 'aJ',  '*select-a-function*': 's:select_a_line',
+\        'select-i': 'iJ',  '*select-i-function*': 's:select_i_line'
 \      }
 \    })
 
@@ -42,7 +47,7 @@ function! s:find_block(current_mode)
         return s:abort()
       endif
     endwhile
-    if a:current_mode == 'i' || b:txtobj_jl_last_mode == 'i'
+    if !(a:current_mode[0] == 'a' && a:current_mode == b:txtobj_jl_last_mode)
       let flags .= 'c'
     endif
   elseif expand("<cword>") =~# b:julia_end_keywords
@@ -89,10 +94,12 @@ function! s:get_save_pos()
   endif
 endfunction
 
-function! s:select_a()
+function! s:select_a(...)
+  let select_mode = a:0 > 0 ? a:1 : 'v'
+  let current_mode = 'a' . select_mode
   call s:get_save_pos()
   let current_pos = getpos('.')
-  let ret_find_block = s:find_block("a")
+  let ret_find_block = s:find_block(current_mode)
   if empty(ret_find_block)
     return 0
   endif
@@ -105,7 +112,7 @@ function! s:select_a()
   let end_pos = getpos('.')
 
   let b:txtobj_jl_doing_select = 1
-  let b:txtobj_jl_last_mode = 'a'
+  let b:txtobj_jl_last_mode = 'a' . select_mode
 
   " the textobj-user plugin triggers CursorMove only if
   " end_pos is different than the staring position
@@ -114,12 +121,18 @@ function! s:select_a()
     call s:cursor_moved()
   endif
 
-  return ['V', start_pos, end_pos]
+  return [select_mode, start_pos, end_pos]
 endfunction
 
-function! s:select_i()
+function! s:select_a_line()
+  return s:select_a('V')
+endfunction
+
+function! s:select_i(...)
+  let select_mode = a:0 > 0 ? a:1 : 'v'
+  let current_mode = 'i' . select_mode
   call s:get_save_pos()
-  let ret_find_block = s:find_block("i")
+  let ret_find_block = s:find_block(current_mode)
   if empty(ret_find_block)
     return 0
   endif
@@ -132,7 +145,7 @@ function! s:select_i()
   call s:set_mark_tick(end_pos)
 
   let b:txtobj_jl_doing_select = 1
-  let b:txtobj_jl_last_mode = 'i'
+  let b:txtobj_jl_last_mode = 'i' . select_mode
 
   let start_pos[1] += 1
   call setpos('.', start_pos)
@@ -141,7 +154,11 @@ function! s:select_i()
   let end_pos[1] -= 1
   let end_pos[2] = len(getline(end_pos[1]))
 
-  return ['V', start_pos, end_pos]
+  return [select_mode, start_pos, end_pos]
+endfunction
+
+function! s:select_i_line()
+  return s:select_i('V')
 endfunction
 
 function TextobjJuliablockReset()
