@@ -76,7 +76,7 @@ endfunction
 function! s:abort(save_pos)
   call setpos('.', a:save_pos)
   call feedkeys("\<Esc>")
-  return
+  return 0
 endfunction
 
 function! s:set_mark_tick(save_pos, end_pos)
@@ -88,7 +88,7 @@ endfunction
 function! s:select_a()
   let ret_find_block = s:find_block("a")
   if empty(ret_find_block)
-    return
+    return 0
   endif
   let [start_pos, end_pos, save_pos] = ret_find_block
 
@@ -107,7 +107,7 @@ endfunction
 function! s:select_i()
   let ret_find_block = s:find_block("i")
   if empty(ret_find_block)
-    return
+    return 0
   endif
   let [start_pos, end_pos, save_pos] = ret_find_block
 
