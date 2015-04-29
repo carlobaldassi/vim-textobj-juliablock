@@ -49,7 +49,7 @@ function! s:find_block(current_mode)
     endif
   elseif expand("<cword>") =~# b:julia_end_keywords
     let flags .= 'c'
-    normal lb
+    normal! lb
   endif
   " NOTE: b:julia_begin_keywords, b:julia_end_keywords and b:match_skip are
   "       defined in the julia-vim plugin
@@ -81,7 +81,7 @@ endfunction
 
 function! s:set_mark_tick(save_pos, end_pos)
   call setpos('.', a:save_pos)
-  normal m`
+  normal! m`
   keepjumps call setpos('.', a:end_pos)
 endfunction
 
@@ -95,7 +95,7 @@ function! s:select_a()
   call s:set_mark_tick(save_pos, end_pos)
 
   call setpos('.', end_pos)
-  normal e
+  normal! e
   let end_pos = getpos('.')
   let end_pos[2] += 1
 
