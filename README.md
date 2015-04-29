@@ -1,12 +1,17 @@
-A custom text object for selecting julia blocks.
+A custom text object for selecting julia blocks in ViM.
 
-Depends on Kana's [textobj-user plugin][u]. Test suite requires [vspec][] (also by Kana).
+Depends on Kana's [textobj-user plugin][u] and the [julia-vim plugin][jv].
 
-Also requires that the matchit.vim plugin is enabled. Ensure that the following line is included somewhere in your vimrc file:
+Also requires that the matchit.vim plugin is enabled. Either ensure that the
+following line is included somewhere in your vimrc file:
 
     runtime macros/matchit.vim
 
-It is also essential that you enable filetype plugins, and disable Vi compatible mode. Placing these lines in your vimrc file will do this:
+or add [edsono/vim-matchit][matchit] to your plugins via your favourite plugin
+manager.
+
+It is also essential that you enable filetype plugins, and disable Vi
+compatible mode. Placing these lines in your vimrc file will do this:
 
     set nocompatible
     if has("autocmd")
@@ -73,41 +78,35 @@ text-object manually. So if you press `vaj` to select the current julia block,
 you can expand your selection outwards by repeating `aj`, or contract your
 selection inwards by repeating `ij`.
 
-Development
-===========
-
-Running the specs
------------------
-
-Set up the testing environment by running this command from the project root:
-
-    bundle install
-
 Generating a vimball
 --------------------
 
 To distribute the script on [vim.org][s] wrap it up as a vimball by following these steps:
 
 * open the file `vimballer` in Vim
-* set the variable `g:vimball_home` to the development directory of this plugin (e.g. run: `:let g:vimball_home='~/dotfiles/vim/bundle/textobj-juliablock'`)
+* set the variable `g:vimball_home` to the development directory of this plugin
+  (e.g. run: `:let g:vimball_home='~/dotfiles/vim/bundle/textobj-juliablock'`)
 * visually select all lines in `vimballer` file
 * run `'<,'>MkVimball! textobj-juliablock.vba`
 
 That should create a file called `textobj-juliablock.vba` which you can upload to [vim.org][s].
 
 [u]: https://github.com/kana/vim-textobj-user
-[vspec]: https://github.com/kana/vim-vspec
+[jv]: https://github.com/JuliaLang/julia-vim
+[matchit]: https://github.com/edsono/vim-matchit
 [pathogen]: http://www.vim.org/scripts/script.php?script_id=2332
 [s]: http://www.vim.org/scripts/index.php
 
 Credits
 =======
 
-This plugin is a fork of [textobj-rubyblock][] which was built by [Drew Neil][me], adapted to work in [Julia][] rather than Ruby, and it's made possible thanks to the [textobj-user][kana-git] plugin by [Kana][].
+This plugin is a fork of [textobj-rubyblock][] which was built by [Drew Neil][drewneil],
+heavily adapted to work in [Julia][] rather than Ruby, and it's made possible thanks to
+the [textobj-user][kana-git] plugin by [Kana][].
 
 [Kana]: http://whileimautomaton.net/
 [textobj-user]: http://www.vim.org/scripts/script.php?script_id=2100
 [kana-git]: https://github.com/kana/vim-textobj-user
 [textobj-rubyblock]: https://github.com/nelstrom/vim-textobj-rubyblock
-[me]: http://drewneil.com
+[drewneil]: http://drewneil.com
 [Julia]: http://julialang.org

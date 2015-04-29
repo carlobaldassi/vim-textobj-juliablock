@@ -76,6 +76,7 @@ selection inwards by repeating `ij`.
 
 - Vim 7.2 or later
 - |textobj-user| 0.3.7 or later (vimscript#2100)
+- julia-vim
 - |matchit.vim|
 
 Matchit.vim is distributed with Vim, but is not enabled by default. If you add

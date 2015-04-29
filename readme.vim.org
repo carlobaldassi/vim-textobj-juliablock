@@ -1,7 +1,7 @@
 A custom text object for selecting julia blocks.
 
 Depends on vimscript #2100, which provides a framework for creating custom
-text objects.
+text objects, and on julia-vim (https://github.com/JuliaLang/julia-vim).
 
 Also requires that matchit.vim vimscript #39 is enabled.
 
@@ -64,8 +64,9 @@ selection inwards by repeating `ij`.
 
 # Installation #
 
-First of all, ensure that you have installed vimscript #2100, without which
-this plugin will not work.
+First of all, ensure that you have installed vimscript #2100, and julia-vim
+(https://github.com/JuliaLang/julia-vim) without which this plugin will not
+work.
 
 Then, ensure that you have enabled the matchit.vim vimscript #39 plugin. This
 can be achieved by running (or placing this in your vimrc file):
@@ -86,8 +87,10 @@ open the file with Vim and run the command:
 
     :source %
 
-If you prefer to manage your plugins using pathogen (vimscript #2332), then
-you might prefer to checkout the latest version directly from github:
+If you prefer to manage your plugins using pathogen (vimscript #2332), or
+Vundle, or any other plugin manager, then you might prefer to checkout the
+latest versions directly from github:
 
 * https://github.com/carlobaldassi/vim-textobj-juliablock
 * https://github.com/kana/vim-textobj-user
+* https://github.com/JuliaLang/julia-vim
