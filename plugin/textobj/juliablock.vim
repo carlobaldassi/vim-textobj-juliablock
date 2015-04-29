@@ -2,10 +2,6 @@ if exists('g:loaded_textobj_juliablock')
   finish
 endif
 
-if !exists("loaded_matchit")
-  finish
-endif
-
 call textobj#user#plugin('juliablock', {
 \      '-': {
 \        '*sfile*': expand('<sfile>:p'),
@@ -25,12 +21,18 @@ let s:skip_pattern = 'synIDattr(synID(line("."),col("."),1),"name") =~ '
 
 function! s:find_block(current_mode)
 
+  let save_pos = getpos('.')
+
   if &ft != "julia"
-    call feedkeys("\<Esc>")
-    return
+    return s:abort(save_pos)
   endif
 
-  let save_pos = getpos('.')
+  if !exists("g:loaded_matchit")
+    echohl WarningMsg |
+      \ echomsg "matchit must be loaded in order to use juliablock text objects" |
+      \ echohl None | sleep 1
+    return s:abort(save_pos)
+  endif
 
   let flags = 'W'
 
