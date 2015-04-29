@@ -18,24 +18,6 @@ call textobj#user#plugin('juliablock', {
 
 function! s:find_block(current_mode)
 
-  if &ft != "julia"
-    return s:abort()
-  endif
-
-  if !exists("b:julia_vim_loaded")
-    echohl WarningMsg |
-      \ echomsg "the julia-vim plugin is needed in order to use juliablock text objects" |
-      \ echohl None | sleep 1
-    return s:abort()
-  endif
-
-  if !exists("g:loaded_matchit")
-    echohl WarningMsg |
-      \ echomsg "matchit must be loaded in order to use juliablock text objects" |
-      \ echohl None | sleep 1
-    return s:abort()
-  endif
-
   let flags = 'W'
 
   if b:txtobj_jl_did_select
@@ -95,7 +77,25 @@ function! s:get_save_pos()
 endfunction
 
 function! s:repeated_find(ai_mode, select_mode)
-  let repeat = v:count1 + (a:ai_mode == 'i' ? 1 : 0)
+  if &ft != "julia"
+    return s:abort()
+  endif
+
+  if !exists("b:julia_vim_loaded")
+    echohl WarningMsg |
+      \ echomsg "the julia-vim plugin is needed in order to use juliablock text objects" |
+      \ echohl None | sleep 1
+    return s:abort()
+  endif
+
+  if !exists("g:loaded_matchit")
+    echohl WarningMsg |
+      \ echomsg "matchit must be loaded in order to use juliablock text objects" |
+      \ echohl None | sleep 1
+    return s:abort()
+  endif
+
+  let repeat = v:count1 + (a:ai_mode == 'i' && v:count1 > 1 ? 1 : 0)
   for c in range(repeat)
     let current_mode = (c < repeat - 1 ? 'a' : a:ai_mode) . a:select_mode
     let ret_find_block = s:find_block(current_mode)
@@ -129,7 +129,6 @@ function! s:select_a(...)
   let end_pos = getpos('.')
 
   let b:txtobj_jl_doing_select = 1
-  let b:txtobj_jl_did_select = 0
 
   " the textobj-user plugin triggers CursorMove only if
   " end_pos is different than the staring position
@@ -162,7 +161,6 @@ function! s:select_i(...)
   call s:set_mark_tick(end_pos)
 
   let b:txtobj_jl_doing_select = 1
-  let b:txtobj_jl_did_select = 0
 
   let start_pos[1] += 1
   call setpos('.', start_pos)
@@ -201,10 +199,9 @@ augroup TextobjJuliaBlock
   au CursorMoved          *.jl call s:cursor_moved()
 augroup END
 
-" we would need some autocmd event associated with visual mode,
-" (exiting from visual mode, moving...) but there isn't any,
-" so we resort to this crude hack (which still doesn't detect
-" moving around)
+" we would need some autocmd event associated with exiting from
+" visual mode, but there isn't any, so we resort to this crude
+" hack
 vnoremap <silent><unique> <Esc> <Esc>:call TextobjJuliablockReset()<CR>
 
 
