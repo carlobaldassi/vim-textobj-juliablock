@@ -49,7 +49,7 @@ function! s:find_block(current_mode)
     endif
   elseif expand("<cword>") =~# b:julia_end_keywords
     let flags .= 'c'
-    normal b
+    normal lb
   endif
   " NOTE: b:julia_begin_keywords, b:julia_end_keywords and b:match_skip are
   "       defined in the julia-vim plugin
