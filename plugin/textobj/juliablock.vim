@@ -91,6 +91,7 @@ endfunction
 
 function! s:select_a()
   call s:get_save_pos()
+  let current_pos = getpos('.')
   let ret_find_block = s:find_block("a")
   if empty(ret_find_block)
     return 0
@@ -105,6 +106,13 @@ function! s:select_a()
 
   let b:txtobj_jl_doing_select = 1
   let b:txtobj_jl_last_mode = 'a'
+
+  " the textobj-user plugin triggers CursorMove only if
+  " end_pos is different than the staring position
+  " (this is needed when starting from the 'd' in 'end')
+  if current_pos == end_pos
+    call s:cursor_moved()
+  endif
 
   return ['V', start_pos, end_pos]
 endfunction
@@ -136,15 +144,27 @@ function! s:select_i()
   return ['V', start_pos, end_pos]
 endfunction
 
-function s:cursor_moved()
+function TextobjJuliablockReset()
+  let b:txtobj_jl_did_select = 0
+  let b:txtobj_jl_doing_select = 0
+  let b:txtobj_jl_last_mode = ""
+endfunction
+
+function! s:cursor_moved()
   let b:txtobj_jl_did_select = b:txtobj_jl_doing_select
   let b:txtobj_jl_doing_select = 0
 endfunction
 
-augroup TextobjJuliaBlocks
-  au BufEnter,InsertEnter *.jl let b:txtobj_jl_did_select = 0 | let b:txtobj_jl_doing_select = 0 | let b:txtobj_jl_last_mode = ""
+augroup TextobjJuliaBlock
+  au BufEnter,InsertEnter *.jl call TextobjJuliablockReset()
   au CursorMoved          *.jl call s:cursor_moved()
 augroup END
+
+" we would need some autocmd event associated with visual mode,
+" (exiting from visual mode, moving...) but there isn't any,
+" so we resort to this crude hack (which still doesn't detect
+" moving around)
+vnoremap <silent><unique> <Esc> <Esc>:call TextobjJuliablockReset()<CR>
 
 
 let g:loaded_textobj_juliablock = 1
