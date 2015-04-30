@@ -12,9 +12,36 @@ call textobj#user#plugin('juliablock', {
 \        'sfile': expand('<sfile>:p'),
 \        'select-a': 'aJ',  'select-a-function': 's:select_a_line',
 \        'select-i': 'iJ',  'select-i-function': 's:select_i_line'
+\      },
+\      'm': {
+\        'sfile': expand('<sfile>:p'),
+\        'move-N': '<C-J>e', 'move-N-function': 's:move_N',
+\        'move-n': '<C-J>w', 'move-n-function': 's:move_n',
+\        'move-p': '<C-J>b', 'move-p-function': 's:move_p',
+\        'move-P': '<C-J>ge', 'move-P-function': 's:move_P'
 \      }
 \    })
 
+function! s:check_requirements()
+  if &ft != "julia"
+    return 0
+  endif
+
+  if !exists("b:julia_vim_loaded")
+    echohl WarningMsg |
+      \ echomsg "the julia-vim plugin is needed in order to use juliablock text objects" |
+      \ echohl None | sleep 1
+    return 0
+  endif
+
+  if !exists("g:loaded_matchit")
+    echohl WarningMsg |
+      \ echomsg "matchit must be loaded in order to use juliablock text objects" |
+      \ echohl None | sleep 1
+    return 0
+  endif
+  return 1
+endfunction
 
 function! s:find_block(current_mode)
 
@@ -22,17 +49,11 @@ function! s:find_block(current_mode)
 
   if b:txtobj_jl_did_select
     call setpos('.', b:txtobj_jl_last_start_pos)
-    while expand("<cword>") !~# b:julia_end_keywords
-      normal %
-      if getpos('.') == b:txtobj_jl_last_start_pos
-        " shouldn't happen, but let's avoid infinite loops anyway
-        return s:abort()
-      endif
-    endwhile
+    call s:cycle_until_end()
     if !(a:current_mode[0] == 'a' && a:current_mode == b:txtobj_jl_last_mode)
       let flags .= 'c'
     endif
-  elseif expand("<cword>") =~# b:julia_end_keywords
+  elseif s:on_end()
     let flags .= 'c'
     normal! lb
   endif
@@ -64,10 +85,10 @@ function! s:abort()
   return 0
 endfunction
 
-function! s:set_mark_tick(end_pos)
+function! s:set_mark_tick(pos)
   call setpos('.', b:txtobj_jl_save_pos)
   normal! m`
-  keepjumps call setpos('.', a:end_pos)
+  keepjumps call setpos('.', a:pos)
 endfunction
 
 function! s:get_save_pos()
@@ -77,21 +98,7 @@ function! s:get_save_pos()
 endfunction
 
 function! s:repeated_find(ai_mode, select_mode)
-  if &ft != "julia"
-    return s:abort()
-  endif
-
-  if !exists("b:julia_vim_loaded")
-    echohl WarningMsg |
-      \ echomsg "the julia-vim plugin is needed in order to use juliablock text objects" |
-      \ echohl None | sleep 1
-    return s:abort()
-  endif
-
-  if !exists("g:loaded_matchit")
-    echohl WarningMsg |
-      \ echomsg "matchit must be loaded in order to use juliablock text objects" |
-      \ echohl None | sleep 1
+  if !s:check_requirements()
     return s:abort()
   endif
 
@@ -181,6 +188,226 @@ endfunction
 
 function! s:select_i_line()
   return s:select_i('V')
+endfunction
+
+function! s:on_end()
+  return getline('.')[col('.')-1] =~# '\k' && expand("<cword>") =~# b:julia_end_keywords
+endfunction
+
+function! s:cycle_until_end()
+  let pos = getpos('.')
+  while !s:on_end()
+    normal %
+    let c = 0
+    if getpos('.') == pos || c > 1000
+      " shouldn't happen, but let's avoid infinite loops anyway
+      return 0
+    endif
+    let c += 1
+  endwhile
+endfunction
+
+function! s:moveto_block_delim(toend, backwards)
+  if !s:check_requirements()
+    return s:abort()
+  endif
+
+  let pattern = a:toend ? b:julia_end_keywords : b:julia_begin_keywords
+  let flags = a:backwards ? 'Wb' : 'W'
+  let ret = 0
+  for c in range(v:count1)
+    if a:toend && a:backwards && s:on_end()
+      normal! bh
+    endif
+    while 1
+      let searchret = search(pattern, flags)
+      if !searchret
+	return ret
+      endif
+      exe "let skip = " . b:match_skip
+      if !skip
+	let ret = 1
+	break
+      endif
+    endwhile
+  endfor
+  return ret
+endfunction
+
+function! s:compare_pos(pos1, pos2)
+  if a:pos1[1] < a:pos2[1]
+    return -1
+  elseif a:pos1[1] > a:pos2[1]
+    return 1
+  elseif a:pos1[2] < a:pos2[2]
+    return -1
+  elseif a:pos1[2] > a:pos2[2]
+    return 1
+  else
+    return 0
+  endif
+endfunction
+
+"function! s:next_block()
+  "if !s:check_requirements()
+    "return s:abort()
+  "endif
+"
+  "let save_pos = getpos('.')
+"
+  "let nbe_ret = s:moveto_next_block_end()
+  "if nbe_ret
+    "let nbe_pos = getpos('.')
+  "else
+    "let nbe_pos = [0,0,0,0]
+  "endif
+"
+  "call setpos('.', save_pos)
+"
+  "let obe_ret = searchpair(b:julia_begin_keywords, '', b:julia_end_keywords, 'W', b:match_skip)
+  "if obe_ret > 0
+    "normal! e
+    "let obe_pos = getpos('.')
+  "else
+    "let obe_pos = [0,0,0,0]
+  "endif
+"
+  "if nbe_ret > 0 && obe_ret > 0
+    ""echo "nbe_pos = " . string(nbe_pos)
+    ""echo "obe_pos = " . string(obe_pos)
+    "let end_pos = s:compare_pos(nbe_pos, obe_pos) < 0 ? nbe_pos : obe_pos
+    ""echo "end_pos = " . string(end_pos) | sleep 1
+  "elseif nbe_ret > 0
+    ""echo "NBE!" | sleep 1
+    "let end_pos = nbe_pos
+  "elseif obe_ret > 0
+    ""echo "obe_pos = " . string(obe_pos)
+    ""echo "OBE!" | sleep 1
+    "let end_pos = obe_pos
+  "else
+    ""echo "NONE" | sleep 1
+    "return s:abort()
+  "endif
+"
+  "call setpos('.', end_pos)
+  "" Jump to match
+  "normal %
+  "let start_pos = getpos('.')
+  "call setpos('.', end_pos)
+"
+  "return [start_pos, end_pos]
+"endfunction
+
+function! s:move_N()
+  call s:get_save_pos()
+  let ret = s:moveto_block_delim(1, 0)
+  if !ret
+    return s:abort()
+  endif
+
+  normal! e
+  let end_pos = getpos('.')
+  normal %
+  let start_pos = getpos('.')
+  call s:set_mark_tick(end_pos)
+
+  return ['v', start_pos, end_pos]
+endfunction
+
+function! s:move_n()
+  call s:get_save_pos()
+  let ret = s:moveto_block_delim(0, 0)
+  if !ret
+    return s:abort()
+  endif
+
+  let start_pos = getpos('.')
+  call s:cycle_until_end()
+  let end_pos = getpos('.')
+  call s:set_mark_tick(start_pos)
+
+  return ['v', start_pos, end_pos]
+endfunction
+
+"function! s:prev_block()
+  "if !s:check_requirements()
+    "return s:abort()
+  "endif
+"
+  "let save_pos = getpos('.')
+"
+  "let nbe_ret = s:moveto_prev_block_start()
+  "if nbe_ret
+    "let nbe_pos = getpos('.')
+  "else
+    "let nbe_pos = [0,0,0,0]
+  "endif
+"
+  "call setpos('.', save_pos)
+"
+  "let obe_ret = searchpair(b:julia_begin_keywords, '', b:julia_end_keywords, 'Wb', b:match_skip)
+  "if obe_ret > 0
+    "let obe_pos = getpos('.')
+  "else
+    "let obe_pos = [0,0,0,0]
+  "endif
+"
+  "if nbe_ret > 0 && obe_ret > 0
+    ""echo "nbe_pos = " . string(nbe_pos)
+    ""echo "obe_pos = " . string(obe_pos)
+    "let start_pos = s:compare_pos(nbe_pos, obe_pos) < 0 ? obe_pos : nbe_pos
+    ""echo "start_pos = " . string(start_pos) | sleep 1
+  "elseif nbe_ret > 0
+    ""echo "NBE!" | sleep 1
+    "let start_pos = nbe_pos
+  "elseif obe_ret > 0
+    ""echo "obe_pos = " . string(obe_pos)
+    ""echo "OBE!" | sleep 1
+    "let start_pos = obe_pos
+  "else
+    ""echo "NONE" | sleep 1
+    "return s:abort()
+  "endif
+"
+  "call setpos('.', start_pos)
+  "" Jump to match
+  "call s:cycle_until_end()
+  "normal e
+  "let end_pos = getpos('.')
+  ""call setpos('.', start_pos)
+"
+  "return [start_pos, end_pos]
+"endfunction
+
+function! s:move_p()
+  call s:get_save_pos()
+  let ret = s:moveto_block_delim(0, 1)
+  if !ret
+    return s:abort()
+  endif
+
+  let start_pos = getpos('.')
+  call s:cycle_until_end()
+  let end_pos = getpos('.')
+  call s:set_mark_tick(start_pos)
+
+  return ['v', start_pos, end_pos]
+endfunction
+
+function! s:move_P()
+  call s:get_save_pos()
+  let ret = s:moveto_block_delim(1, 1)
+  if !ret
+    return s:abort()
+  endif
+
+  normal! e
+  let end_pos = getpos('.')
+  normal %
+  let start_pos = getpos('.')
+  call s:set_mark_tick(end_pos)
+
+  return ['v', start_pos, end_pos]
 endfunction
 
 function TextobjJuliablockReset()
