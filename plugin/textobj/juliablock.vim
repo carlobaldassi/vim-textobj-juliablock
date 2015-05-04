@@ -23,7 +23,9 @@ call textobj#user#plugin('juliablock', {
 \      'bm': {
 \        'sfile': expand('<sfile>:p'),
 \        'move-N': '][', 'move-N-function': 's:moveblock_N',
-\        'move-p': '[]', 'move-p-function': 's:moveblock_p'
+\        'move-n': ']]', 'move-n-function': 's:moveblock_n',
+\        'move-p': '[]', 'move-p-function': 's:moveblock_p',
+\        'move-P': '[[', 'move-P-function': 's:moveblock_P'
 \      }
 \    })
 
@@ -214,6 +216,7 @@ function! s:cycle_until_end()
     endif
     let c += 1
   endwhile
+  return 1
 endfunction
 
 function! s:moveto_block_delim(toend, backwards)
@@ -406,6 +409,66 @@ function! s:moveblock_N()
   return ['v', start_pos, end_pos]
 endfunction
 
+function! s:moveblock_n()
+  call s:get_save_pos()
+  if !s:check_requirements()
+    return s:abort()
+  endif
+
+  let vcount = v:count1
+
+  let moveret = s:moveto_currentblock_end()
+  if !moveret
+    return s:abort()
+  endif
+
+  let ret = 0
+  for c in range(vcount)
+    let last_seen_pos = getpos('.')
+    normal! hel
+    let save_pos = getpos('.')
+    let ret_start = s:moveto_block_delim(0, 0)
+    if ret_start
+      let start1_pos = getpos('.')
+    else
+      let start1_pos = [0,0,0,0]
+    endif
+    call setpos('.', save_pos)
+    if s:on_end()
+      normal! h
+    endif
+    let ret_end = s:moveto_block_delim(1, 0)
+    if ret_end
+      let end1_pos = getpos('.')
+    else
+      let end1_pos = [0,0,0,0]
+    endif
+
+    if ret_start && (!ret_end || s:compare_pos(start1_pos, end1_pos) < 0)
+      call setpos('.', start1_pos)
+      if !s:cycle_until_end()
+	call setpos('.', last_seen_pos)
+	break
+      endif
+      let ret = 1
+    else
+      call setpos('.', last_seen_pos)
+      break
+    endif
+  endfor
+
+  if !ret
+    return s:abort()
+  endif
+  let end_pos = getpos('.')
+  normal %
+  let start_pos = getpos('.')
+
+  call s:set_mark_tick(start_pos)
+
+  return ['v', start_pos, end_pos]
+endfunction
+
 function! s:moveblock_p()
   call s:get_save_pos()
   if !s:check_requirements()
@@ -427,12 +490,12 @@ function! s:moveblock_p()
       call setpos('.', save_pos)
       let ret_end = s:moveto_block_delim(1, 1)
       if ret_end
-	let end_pos1 = getpos('.')
+	let end1_pos = getpos('.')
       else
-	let end_pos1 = [0,0,0,0]
+	let end1_pos = [0,0,0,0]
       endif
-      if ret_end && (!ret_start || s:compare_pos(start1_pos, end_pos1) < 0)
-	call setpos('.', end_pos1)
+      if ret_end && (!ret_start || s:compare_pos(start1_pos, end1_pos) < 0)
+	call setpos('.', end1_pos)
       else
 	call setpos('.', save_pos)
       endif
@@ -458,7 +521,68 @@ function! s:moveblock_p()
   return ['v', start_pos, end_pos]
 endfunction
 
+function! s:moveblock_P()
+  call s:get_save_pos()
+  if !s:check_requirements()
+    return s:abort()
+  endif
 
+  let vcount = v:count1
+
+  let moveret = s:moveto_currentblock_end()
+  if !moveret
+    return s:abort()
+  endif
+  normal %
+  if !s:on_begin()
+    return s:abort()
+  endif
+
+  let ret = 0
+  for c in range(vcount)
+    let last_seen_pos = getpos('.')
+    normal! lbh
+    let save_pos = getpos('.')
+    let ret_start = s:moveto_block_delim(0, 1)
+    if ret_start
+      let start1_pos = getpos('.')
+    else
+      let start1_pos = [0,0,0,0]
+    endif
+    call setpos('.', save_pos)
+    let ret_end = s:moveto_block_delim(1, 1)
+    if ret_end
+      let end1_pos = getpos('.')
+    else
+      let end1_pos = [0,0,0,0]
+    endif
+
+    if ret_end && (!ret_start || s:compare_pos(start1_pos, end1_pos) < 0)
+      call setpos('.', end1_pos)
+      normal %
+      if !s:on_begin()
+	call setpos('.', last_seen_pos)
+	break
+      endif
+      let ret = 1
+    else
+      call setpos('.', save_pos)
+    endif
+  endfor
+
+  if !ret
+    return s:abort()
+  endif
+  let start_pos = getpos('.')
+  if !s:cycle_until_end()
+    return s:abort()
+  endif
+  let end_pos = getpos('.')
+
+  call s:set_mark_tick(end_pos)
+
+  return ['v', start_pos, end_pos]
+endfunction
 
 function TextobjJuliablockReset()
   let b:txtobj_jl_did_select = 0
