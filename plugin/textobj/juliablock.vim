@@ -391,15 +391,15 @@ function! s:moveblock_N()
       break
     endif
 
-    let end_pos = getpos('.')
-    normal %
-    let start_pos = getpos('.')
-    call setpos('.', end_pos)
     let ret = 1
   endfor
   if !ret
     return s:abort()
   endif
+  let end_pos = getpos('.')
+  normal %
+  let start_pos = getpos('.')
+  call setpos('.', end_pos)
 
   call s:set_mark_tick(end_pos)
 
@@ -447,7 +447,6 @@ function! s:moveblock_p()
     let end_pos = getpos('.')
     normal %
     let start_pos = getpos('.')
-    call setpos('.', start_pos)
     let ret = 1
   endfor
   if !ret
