@@ -24,8 +24,8 @@ call textobj#user#plugin('juliablock', {
 \        'sfile': expand('<sfile>:p'),
 \        'move-N': '][', 'move-N-function': 's:moveblock_N',
 \        'move-n': ']]', 'move-n-function': 's:moveblock_n',
-\        'move-p': '[]', 'move-p-function': 's:moveblock_p',
-\        'move-P': '[[', 'move-P-function': 's:moveblock_P'
+\        'move-p': '[[', 'move-p-function': 's:moveblock_p',
+\        'move-P': '[]', 'move-P-function': 's:moveblock_P'
 \      }
 \    })
 
