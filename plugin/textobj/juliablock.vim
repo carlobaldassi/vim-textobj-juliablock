@@ -15,15 +15,15 @@ call textobj#user#plugin('juliablock', {
 \      },
 \      'm': {
 \        'sfile': expand('<sfile>:p'),
-\        'move-N': '<C-J>e', 'move-N-function': 's:move_N',
-\        'move-n': '<C-J>w', 'move-n-function': 's:move_n',
-\        'move-p': '<C-J>b', 'move-p-function': 's:move_p',
-\        'move-P': '<C-J>ge', 'move-P-function': 's:move_P'
+\        'move-N': ']e', 'move-N-function': 's:move_N',
+\        'move-n': ']w', 'move-n-function': 's:move_n',
+\        'move-p': '[b', 'move-p-function': 's:move_p',
+\        'move-P': '[ge', 'move-P-function': 's:move_P'
 \      },
 \      'bm': {
 \        'sfile': expand('<sfile>:p'),
-\        'move-N': '<C-P>e', 'move-N-function': 's:moveblock_N',
-\        'move-p': '<C-P>b', 'move-p-function': 's:moveblock_p'
+\        'move-N': '][', 'move-N-function': 's:moveblock_N',
+\        'move-p': '[]', 'move-p-function': 's:moveblock_p'
 \      }
 \    })
 
